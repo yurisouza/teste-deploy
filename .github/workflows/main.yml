@@ -1,0 +1,47 @@
+name: Docker
+
+on:
+  push:
+    # Publish `master` as Docker `latest` image.
+    branches:
+      - develop
+      - release
+
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
+
+env:
+  # TODO: Change variable to your image's name.
+  IMAGE_NAME: banking-bff
+  DOCKER_IMAGE: gcr.io/conta-pf-prd
+  BRANCH: anyone
+
+jobs:
+
+  # Build image.
+  # See also https://docs.docker.com/docker-hub/builds/
+  deployment:
+    # Ensure test job passes before pushing image.
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Configure branch name
+        run: |
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          BRANCH=$VERSION
+          echo BRANCH=$BRANCH
+          echo BRANCH=$BRANCH >> $GITHUB_ENV
+
+      - name: Build Production Image
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo MASTER
+
+      - name: Build Development Image
+        if: ${{ env.BRANCH  == 'develop' }}
+        run: |
+          echo DEVELOP   
